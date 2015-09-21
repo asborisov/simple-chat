@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple WebSocket Chat</title>
+
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+<div id="loginForm">
+    <p>Please enter your login</p>
+
+    <form name="login">
+        <input type="text" name="login" placeholder="Enter you login" autocomplete="off">
+        <input type="submit" value="Enter">
+    </form>
+    <div class="error"></div>
+</div>
+
+<div id="chat" class="hidden">
+    <div class="users">
+        <p>Online users:</p>
+        <div class="list-wrapper"></div>
+    </div>
+    <div class="messages">
+        <div class="list-wrapper"></div>
+    </div>
+</div>
+
+<div id="publish" class="hidden">
+    <form name="publish">
+    <textarea name="message" placeholder="Your message here (Ctrl + Enter to send)"
+              onkeypress="textAreaKeyPress(event)"></textarea>
+        <input type="submit" value="Send"/>
+    </form>
+</div>
+
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript">
+    function textAreaKeyPress(event) {
+        if (event.ctrlKey && event.keyCode == 10) return document.forms.publish.onsubmit();
+    }
+</script>
+</body>
+</html>

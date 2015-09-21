@@ -1,0 +1,18 @@
+{
+  "name": "test-task-2gis",
+  "version": "0.0.1",
+  "description": "Simple chat",
+  "license": "",
+  "repository": "",
+  "dependencies": {
+    "node-uuid": "^1.4.3",
+    "ws": "^0.8.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^1.11.2",
+    "gulp-sass": "^2.0.4",
+    "gulp-uglify": "^1.4.1"
+  }
+}

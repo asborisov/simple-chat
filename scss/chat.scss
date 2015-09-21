@@ -1,0 +1,88 @@
+html {
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  min-width: 850px;
+  height: 100%;
+  margin: 0;
+
+  #loginForm {
+    text-align: center;
+
+    .error {
+      color: red;
+    }
+  }
+
+  #chat {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+
+    .wrapper {
+      // works on webkit only
+      overflow-y: overlay;
+      height: 100%;
+    }
+
+    .users {
+      @extend .wrapper;
+      width: 150px;
+      float: left;
+      p {
+        margin: 10px 0 0 5px;
+      }
+
+      .list-wrapper {
+        margin-left: 5px;
+        padding-bottom: 50px;
+        .user {
+          margin: 5px;
+        }
+      }
+    }
+
+    .messages {
+      @extend .wrapper;
+      .list-wrapper {
+        padding: 10px 0 50px 0;
+        .message {
+          .sender {
+            color: dimgray;
+            margin-right: 5px;
+          }
+          div {
+            display: inline-block;
+            vertical-align: top;
+          }
+        }
+      }
+    }
+  }
+
+  #publish {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    padding-bottom: 5px;
+
+    textarea {
+      width: 90%;
+      max-width: 90%;
+      max-height: 100px;
+
+      margin: 5px 5px -5px 10px;
+    }
+
+    input {
+      width: 7%;
+    }
+  }
+}
+
+.hidden {
+  display: none;
+}

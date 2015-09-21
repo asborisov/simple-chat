@@ -1,0 +1,53 @@
+html {
+  height: 100%; }
+
+body {
+  width: 100%;
+  min-width: 850px;
+  height: 100%;
+  margin: 0; }
+  body #loginForm {
+    text-align: center; }
+    body #loginForm .error {
+      color: red; }
+  body #chat {
+    height: 100%;
+    overflow: hidden;
+    position: relative; }
+    body #chat .wrapper, body #chat .users, body #chat .messages {
+      overflow-y: overlay;
+      height: 100%; }
+    body #chat .users {
+      width: 150px;
+      float: left; }
+      body #chat .users p {
+        margin: 10px 0 0 5px; }
+      body #chat .users .list-wrapper {
+        margin-left: 5px;
+        padding-bottom: 50px; }
+        body #chat .users .list-wrapper .user {
+          margin: 5px; }
+    body #chat .messages .list-wrapper {
+      padding: 10px 0 50px 0; }
+      body #chat .messages .list-wrapper .message .sender {
+        color: dimgray;
+        margin-right: 5px; }
+      body #chat .messages .list-wrapper .message div {
+        display: inline-block;
+        vertical-align: top; }
+  body #publish {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    padding-bottom: 5px; }
+    body #publish textarea {
+      width: 90%;
+      max-width: 90%;
+      max-height: 100px;
+      margin: 5px 5px -5px 10px; }
+    body #publish input {
+      width: 7%; }
+
+.hidden {
+  display: none; }
