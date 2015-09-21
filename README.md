@@ -15,3 +15,7 @@ Simple WebSocket chat implimentation with node.js and pure js
 2. Download dependencies with `npm install`. Note: if you have build error because of python absence just start `npm install` again
 3. Build with `gulp`
 4. Go to step 2 of start order
+
+### Tested on
+node.js v4.0.0
+npm v.2.10.0
