@@ -2,8 +2,11 @@
   "name": "test-task-2gis",
   "version": "0.0.1",
   "description": "Simple chat",
-  "license": "",
-  "repository": "",
+  "license": "APSL-2.0",
+  "repository": {
+  	"type": "git",
+  	"url": "https://github.com/asborisov/simple-chat.git"
+  },
   "dependencies": {
     "node-uuid": "^1.4.3",
     "ws": "^0.8.0"
