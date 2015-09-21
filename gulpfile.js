@@ -17,10 +17,16 @@ gulp.task('sass', function () {
 		.pipe(gulp.dest('dist'));
 });
 // JS minify
-gulp.task('uglify', function () {
+gulp.task('uglify:front', function () {
 	return gulp.src(['src/*.js'])
 		.pipe(jshint())
 		.pipe(concat('main.js'))
+		.pipe(uglify())
+		.pipe(gulp.dest('dist'));
+});
+gulp.task('uglify:server', function () {
+	return gulp.src(['server.js'])
+		.pipe(jshint())
 		.pipe(uglify())
 		.pipe(gulp.dest('dist'));
 });
@@ -30,11 +36,11 @@ gulp.task('html', function () {
 		.pipe(gulp.dest('dist'));
 });
 // Default task
-gulp.task('default', ['html', 'sass', 'uglify'], function () {
+gulp.task('default', ['html', 'sass', 'uglify:front', 'uglify:server'], function () {
 });
 // dev watcher
 gulp.task('dev', ['server-jshint', 'html', 'sass', 'uglify'], function () {
-	gulp.watch(['index.html', 'scss/*.scss', 'src/*.js', 'server.js'], ['html', 'sass', 'uglify', 'server-jshint']);
+	gulp.watch(['index.html', 'scss/*.scss', 'src/*.js', 'server.js'], ['html', 'sass', 'uglify:front', 'server-jshint']);
 });
 // server code validator
 gulp.task('server-jshint', function () {
