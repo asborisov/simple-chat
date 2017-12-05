@@ -9,7 +9,7 @@
      * Connection to server
      * @type {WebSocket}
      */
-    var socket;
+    let socket;
 
     /**
      * Submit of login form. Login in
@@ -41,7 +41,7 @@
          */
         socket.onmessage = function(event) {
             try {
-                var msg = JSON.parse(event.data);
+                const msg = JSON.parse(event.data);
                 // Check message type
                 switch (msg.type) {
                     case 'login': {
@@ -67,12 +67,12 @@
          * When connection established
          */
         socket.onopen = function() {
-            var chatData = window.localStorage.getItem('chatData');
+            const chatData = window.localStorage.getItem('chatData');
             if (!chatData) return;
             // Parsing data
             try {
-                chatData = JSON.parse(chatData);
-                sendLogin(chatData.login, chatData.guid);
+                const parsedData = JSON.parse(chatData);
+                sendLogin(parsedData.login, parsedData.guid);
             } catch (ex) {
                 console.log(ex);
                 // If we get parsing error - remove this `thing` from storage
@@ -82,9 +82,9 @@
 
         socket.onclose = function() {
             alert('Lost connection. Try to re-login');
-            document.getElementById('publish').addClass('hidden');
-            document.getElementById('chat').addClass('hidden');
-            document.getElementById('loginForm').removeClass('hidden');
+            document.getElementById('publish').classList.add('hidden');
+            document.getElementById('chat').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
             startConnection();
         };
     }
@@ -96,23 +96,21 @@
      */
     function sendLogin(login, guid) {
         if (!login) return;
-        var msg = JSON.stringify({
+        socket.send(JSON.stringify({
             type: 'login',
             guid: guid,
             username: login
-        });
-        socket.send(msg);
+        }));
     }
     /**
      * Send text message to server
      * @param text {string}
      */
     function sendMessage(text) {
-        const msg = JSON.stringify({
+        socket.send(JSON.stringify({
             type: 'message',
             text: text
-        });
-        socket.send(msg);
+        }));
     }
 
     /**
@@ -130,9 +128,9 @@
                 login: data.username,
                 guid: data.guid
             }));
-            document.getElementById('loginForm').addClass('hidden');
-            document.getElementById('publish').removeClass('hidden');
-            document.getElementById('chat').removeClass('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('publish').classList.remove('hidden');
+            document.getElementById('chat').classList.remove('hidden');
         } else {
             const errorMsg = document.getElementById('loginForm').getElementsByClassName('error')[0];
             // Clear all existing children
@@ -161,21 +159,21 @@
      */
     function getMessage(message, sender, timestamp) {
         if (sender && timestamp) {
-            var date = new Date();
+            const date = new Date();
             date.setTime(timestamp);
             timestamp = castDateItem(date.getDate()) + '.' + castDateItem(date.getMonth()) +
                 '.' + castDateItem(date.getFullYear()) + ' ' + castDateItem(date.getHours()) +
                 ':' + castDateItem(date.getMinutes()) + ':' + castDateItem(date.getSeconds());
         }
-        var messageElem = document.createElement('div');
-        messageElem.addClass('message');
+        const messageElem = document.createElement('div');
+        messageElem.classList.add('message');
         if (sender) {
-            var senderDiv = document.createElement('div');
-            senderDiv.addClass('sender');
+            const senderDiv = document.createElement('div');
+            senderDiv.classList.add('sender');
             senderDiv.appendChild(document.createTextNode(sender + (timestamp ? (' [' + timestamp + ']') : '') + ': '));
             messageElem.appendChild(senderDiv);
         }
-        var messageDiv = document.createElement('div');
+        const messageDiv = document.createElement('div');
         messageDiv.innerText = message;
         messageElem.appendChild(messageDiv);
         document.getElementsByClassName('messages')[0].getElementsByClassName('list-wrapper')[0].appendChild(messageElem);
@@ -190,7 +188,7 @@
         }
 
         function scrollToBottom() {
-            var element = document.getElementsByClassName('messages')[0];
+            const element = document.getElementsByClassName('messages')[0];
             element.scrollTop = element.scrollHeight;
         }
     }
@@ -199,15 +197,14 @@
      * @param list {Array} List of users names
      */
     function getUsersList(list) {
-        var usersList = document.getElementsByClassName('users')[0].getElementsByClassName('list-wrapper')[0];
+        const usersList = document.getElementsByClassName('users')[0].getElementsByClassName('list-wrapper')[0];
         while (usersList.firstChild) {
             usersList.removeChild(usersList.firstChild);
         }
-        var div;
         list.forEach(function(user) {
-            div = document.createElement('div');
+            const div = document.createElement('div');
             div.appendChild(document.createTextNode(user));
-            div.addClass('user');
+            div.classList.add('user');
             usersList.appendChild(div);
         });
     }
