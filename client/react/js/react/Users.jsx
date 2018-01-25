@@ -7,7 +7,7 @@ const Users = (props) => {
 };
 Users.propTypes = {
     users: PropTypes.arrayOf(
-        PropTypes.string()
+        PropTypes.string
     )
 };
 

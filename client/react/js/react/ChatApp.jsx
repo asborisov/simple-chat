@@ -86,21 +86,24 @@ class ChatApp extends React.Component {
             );
         }
         return [
-            <div style={{display: 'flex', flexDirection: 'row'}} key="chat">
-                <Messages key={'messages'}
-                          style={{width: '80vw', height: '90vh', display: 'inline-block'}}
-                          messages={this.state.messages}
+            <div style={{display: 'flex', flexDirection: 'row', height: '90vh'}} key="chat">
+                <Messages
+                    key={'messages'}
+                    style={{width: '80vw'}}
+                    messages={this.state.messages}
                 />
-                <Users key={'users'}
-                       style={{width: '20vw', height: '90vh', display: 'inline-block'}}
-                       users={this.state.users}
-                />,
+                <Users
+                    key={'users'}
+                    style={{width: '20vw'}}
+                    users={this.state.users}
+                />
             </div>,
-            <div key="input" style={{width: '100vw', height: '10vh'}}>
-                <input type="text"
-                       onKeyDown={this.submit}
-                       onChange={this.onInputChanged}
-                       value={this.state.inputValue}/>
+            <div key="input" style={{height: '10vh'}}>
+                <input
+                    type="text"
+                    onKeyDown={this.submit}
+                    onChange={this.onInputChanged}
+                    value={this.state.inputValue}/>
                 <input type="button" onClick={this.submit} value="Send"/>
             </div>
         ];

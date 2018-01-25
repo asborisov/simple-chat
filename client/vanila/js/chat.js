@@ -49,7 +49,7 @@
                         break;
                     }
                     case 'message': {
-                        getMessage(msg.text, msg.sender, msg.timestamp);
+                        getMessage(msg.text, msg.author, msg.ts);
                         break;
                     }
                     case 'usersList': {

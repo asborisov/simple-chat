@@ -1,19 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Message = (props) => {
-    return (
-        <span style={{display: 'block'}}>
-            <b>{props.author}</b>
-            {`${props.author && ': '}${props.text}`}
-        </span>
-    );
-};
 const messagePropTypes = {
     uid: PropTypes.string,
     text: PropTypes.string,
     author: PropTypes.string,
     date: PropTypes.instanceOf(Date)
+};
+const formatDate = date => ``;
+const Message = (props) => {
+    return (
+        <div style={{display: 'block'}}>
+            <span>{`${props.author} [${formatDate(props.date)}]`}</span>
+            {`${props.author && ': '}${props.text}`}
+        </div>
+    );
 };
 Message.propTypes = messagePropTypes;
 
@@ -23,7 +24,7 @@ const Messages = (props) => {
 };
 Messages.propTypes = {
     messages: PropTypes.arrayOf(
-        PropTypes.shape(Message.propTypes)
+        PropTypes.shape(messagePropTypes)
     )
 };
 
