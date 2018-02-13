@@ -23,7 +23,7 @@ type ResponseType
     | USERS_LIST
 
 
-type Error
+type ErrorType
     = ERROR_PARSE
     | UNKNOWN_TYPE
 
@@ -43,7 +43,7 @@ type alias Login =
 type ReturnResult
     = MessageRes Message
     | LoginRes Login
-    | Error String
+    | Error ErrorType
 
 
 timestampToDate : Decoder Date
@@ -95,7 +95,7 @@ parseMessage input =
                         okRes
 
                     Err err ->
-                        Error err
+                        Error ERROR_PARSE
            )
 
 
@@ -109,7 +109,7 @@ resultToString result =
             "User " ++ login.user ++ " logged in: " ++ login.text
 
         Error err ->
-            err
+            toString err
 
 
 main : Html msg
