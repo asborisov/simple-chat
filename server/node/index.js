@@ -85,7 +85,7 @@ ws.on('connection', socket => {
  * @param msg.[sender] {string} Who send this message
  */
 const sendMessage = msg => {
-    msg = JSON.stringify(Object.assign({
+    const m = JSON.stringify(Object.assign({
         type: 'message',
         ts: +(new Date()),
         author: '',
@@ -93,7 +93,7 @@ const sendMessage = msg => {
     }, msg));
     ws.clients.forEach(client => {
         if (client.username) {
-            client.send(msg);
+            client.send(m);
         }
     });
 };
