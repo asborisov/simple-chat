@@ -4,9 +4,11 @@ import Debug exposing (log)
 import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (type_)
 import Html.Events exposing (onClick)
+import Date
 import Json.Decode exposing (decodeString, field, value)
 import Json.Encode exposing (encode, object)
 import WebSocket exposing (..)
+import ParseResponse exposing (parseMessage, ReturnResult (..))
 
 
 main =
@@ -17,12 +19,16 @@ main =
         , subscriptions = subscriptions
         }
 
+type alias ChatMessage =
+    { timeStamp: Date.Date
+    , text: String
+    }
 
 type alias Model =
     { username : String
     , loginError : String
     , guid : String
-    , messages : List String
+    , messages : List ChatMessage
     , users : List String
     }
 
@@ -45,24 +51,6 @@ chatServer =
 
 -- UPDATE
 
-
-type alias SocketMessage =
-    { type_ : String
-    , username : String
-    , guid : String
-    }
-
-
-type alias SendLogin =
-    { username : String
-    , guid : String
-    }
-
-
-type alias SocketError =
-    {}
-
-
 type Msg
     = SEND_LOGIN
     | USER_LOGIN
@@ -73,32 +61,13 @@ type Msg
     | SOCKET_MESSAGE String
 
 
-parseResponse : String -> SocketError
-parseResponse response =
-    let
-        msgType =
-            log "type" (Json.Decode.decodeString (Json.Decode.field "type" Json.Decode.string) response)
-
-        msgStatus =
-            log "status" (Json.Decode.decodeString (Json.Decode.field "status" Json.Decode.string) response)
-    in
-    case msgType of
-        "login" ->
-            case msgStatus of
-                "error" ->
-                    log "login_error" (Json.Decode.decodeString (Json.Decode.field "message" Json.Decode.string) response)
-
-                "" ->
-                    log "" 1
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SEND_LOGIN ->
             let
                 payload =
-                    { username = "timan", guid = "123" }
+                    { username = "timan4", guid = "110553e1-1075-11e8-bac9-7993c0cdca52" }
             in
             if String.isEmpty payload.username == True then
                 ( { model | loginError = "Wrong login!" }, Cmd.none )
@@ -128,14 +97,28 @@ update msg model =
 
         SOCKET_MESSAGE response ->
             let
-                msgType =
-                    log "type" (Json.Decode.decodeString (Json.Decode.field "type" Json.Decode.string) response)
-
-                msgData =
-                    log "data" (Json.Decode.decodeString (Json.Decode.field "payload" Json.Decode.value) response)
+                result = parseMessage response
             in
-            ( model, Cmd.none )
+                case result of
+                    MessageRes m -> ( { model | messages = model.messages ++ [(ChatMessage m.timeStamp m.text)] }, Cmd.none)
+                    UsersListRes users_ -> ({ model | users = users_ }, Cmd.none)
+                    _ -> ( model, Cmd.none )
 
+
+resultToString : ReturnResult -> String
+resultToString result =
+    case result of
+        MessageRes msg ->
+            "ts: " ++ toString msg.timeStamp ++ "text: " ++ msg.text
+
+        LoginSuccess login ->
+            "User " ++ login.user ++ " logged in: " ++ login.guid
+
+        UsersListRes users ->
+            "Users: [" ++ toString users ++ "]"
+
+        Error err ->
+            toString err
 
 
 -- SUBSCRIPTIONS
