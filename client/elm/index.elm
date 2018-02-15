@@ -102,6 +102,7 @@ update msg model =
                 case result of
                     MessageRes m -> ( { model | messages = model.messages ++ [(ChatMessage m.timeStamp m.text)] }, Cmd.none)
                     UsersListRes users_ -> ({ model | users = users_ }, Cmd.none)
+--                    LoginSuccess login -> ({ model |  })
                     _ -> ( model, Cmd.none )
 
 

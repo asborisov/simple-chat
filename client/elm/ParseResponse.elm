@@ -16,9 +16,9 @@ type alias Message =
     }
 
 type alias Login =
-    { user : String
-    , guid : String
-    , status: Int
+    { user : Maybe String
+    , guid : Maybe String
+    , status: String
     , message : Maybe String
     }
 
@@ -32,6 +32,7 @@ type ErrorType
 type ReturnResult
     = MessageRes Message
     | LoginSuccess Login
+    | LoginFail Login
     | UsersListRes UsersList
     | Error ErrorType
 
@@ -54,11 +55,17 @@ messageDecoder =
 
 loginDecoder : Decoder ReturnResult
 loginDecoder =
-    Json.Decode.map2 Login
-        (Json.Decode.field "username" Json.Decode.string)
-        (Json.Decode.field "guid" Json.Decode.string)
-        (Json.Decode.field "guid" Json.Decode.string)
-        |> Json.Decode.andThen (\val -> Json.Decode.succeed (LoginSuccess val))
+    Json.Decode.map4 Login
+        (Json.Decode.maybe (Json.Decode.field "username" Json.Decode.string))
+        (Json.Decode.maybe (Json.Decode.field "guid" Json.Decode.string))
+        (Json.Decode.field "status" Json.Decode.string)
+        (Json.Decode.maybe (Json.Decode.field "message" Json.Decode.string))
+--        |> Json.Decode.andThen (\val -> Json.Decode.succeed (LoginSuccess val))
+        |> Json.Decode.andThen (\val ->
+            if val.status == "ok" then
+                Json.Decode.succeed (LoginSuccess val)
+            else
+                Json.Decode.succeed (LoginFail val))
 
 usersListDecoder : Decoder ReturnResult
 usersListDecoder =
