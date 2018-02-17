@@ -1,4 +1,4 @@
-module ParseResponse exposing (parseMessage, ReturnResult (..), ErrorType (..), Message, Login)
+module DecodeResponse exposing (parseMessage, ReturnResult (..), ErrorType (..), Message, Login)
 
 --module Main exposing (..)
 
@@ -16,10 +16,21 @@ type alias Message =
     }
 
 type alias Login =
-    { user : Maybe String
+    { username : String
+    , guid : String
+    }
+
+type alias LoginError =
+    { code: Int
+    , message: String
+    }
+
+type alias LoginResponse =
+    { username : Maybe String
     , guid : Maybe String
     , status: String
-    , message : Maybe String
+    , message: Maybe String
+    , code: Maybe Int
     }
 
 type alias UsersList = List String
@@ -32,7 +43,7 @@ type ErrorType
 type ReturnResult
     = MessageRes Message
     | LoginSuccess Login
-    | LoginFail Login
+    | LoginFail LoginError
     | UsersListRes UsersList
     | Error ErrorType
 
@@ -53,19 +64,49 @@ messageDecoder =
         |> Json.Decode.andThen (\val -> Json.Decode.succeed (MessageRes val))
 
 
+--loginDecoder : Decoder ReturnResult
+--loginDecoder =
+--    Json.Decode.map4 Login
+--        (Json.Decode.maybe (Json.Decode.field "username" Json.Decode.string))
+--        (Json.Decode.maybe (Json.Decode.field "guid" Json.Decode.string))
+--        (Json.Decode.field "status" Json.Decode.string)
+--        (Json.Decode.maybe (Json.Decode.field "message" Json.Decode.string))
+----        |> Json.Decode.andThen (\val -> Json.Decode.succeed (LoginSuccess val))
+--        |> Json.Decode.andThen (\val ->
+--            if val.status == "ok" then
+--                Json.Decode.succeed (LoginSuccess val)
+--            else
+--                Json.Decode.succeed (LoginFail val))
+
+successToLogin : LoginResponse -> Login
+successToLogin resp =
+    let
+        user = Maybe.withDefault "" resp.username
+        guid = Maybe.withDefault "" resp.guid
+    in
+        Login user guid
+
+failToLoginError : LoginResponse -> LoginError
+failToLoginError resp =
+    let
+        code = Maybe.withDefault -1 resp.code
+        msg = Maybe.withDefault "" resp.message
+    in
+        LoginError code msg
+
 loginDecoder : Decoder ReturnResult
 loginDecoder =
-    Json.Decode.map4 Login
+    Json.Decode.map5 LoginResponse
         (Json.Decode.maybe (Json.Decode.field "username" Json.Decode.string))
         (Json.Decode.maybe (Json.Decode.field "guid" Json.Decode.string))
         (Json.Decode.field "status" Json.Decode.string)
         (Json.Decode.maybe (Json.Decode.field "message" Json.Decode.string))
---        |> Json.Decode.andThen (\val -> Json.Decode.succeed (LoginSuccess val))
+        (Json.Decode.maybe (Json.Decode.field "code" Json.Decode.int))
         |> Json.Decode.andThen (\val ->
             if val.status == "ok" then
-                Json.Decode.succeed (LoginSuccess val)
+                Json.Decode.succeed (LoginSuccess (successToLogin val))
             else
-                Json.Decode.succeed (LoginFail val))
+                Json.Decode.succeed (LoginFail (failToLoginError val)))
 
 usersListDecoder : Decoder ReturnResult
 usersListDecoder =
