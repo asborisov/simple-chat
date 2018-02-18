@@ -1,14 +1,15 @@
 module Main exposing (..)
 
-import Debug exposing (log)
-import Html exposing (Html, button, div, input, text, label)
-import Html.Attributes exposing (type_, placeholder, value, style)
-import Html.Events exposing (onClick, onInput)
 import Date
+import Debug exposing (log)
+import DecodeResponse exposing (ReturnResult(..), parseMessage)
+import EncodeRequest exposing (LoginPayload, Payload(..), encodeRequest)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (placeholder, style, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode exposing (decodeString, field)
 import Json.Encode exposing (encode, object)
 import WebSocket exposing (..)
-import DecodeResponse exposing (parseMessage, ReturnResult (..))
 
 
 main =
@@ -19,10 +20,13 @@ main =
         , subscriptions = subscriptions
         }
 
+
 type alias ChatMessage =
-    { timeStamp: Date.Date
-    , text: String
+    { timeStamp : Date.Date
+    , text : String
+--    , author : String
     }
+
 
 type alias Model =
     { username : String
@@ -52,6 +56,7 @@ chatServer =
 
 -- UPDATE
 
+
 type Msg
     = SEND_LOGIN
     | USER_LOGIN
@@ -69,8 +74,10 @@ update msg model =
     case msg of
         InputName name ->
             ( { model | username = name }, Cmd.none )
+
         InputMsg text ->
-            ( { model | chatText = text }, Cmd.none)
+            ( { model | chatText = text }, Cmd.none )
+
         SEND_LOGIN ->
             let
                 payload =
@@ -81,9 +88,7 @@ update msg model =
             else
                 let
                     message =
-                        [ ( "type", Json.Encode.string "login" ), ( "username", Json.Encode.string payload.username ), ( "guid", Json.Encode.string payload.guid ) ]
-                            |> Json.Encode.object
-                            |> Json.Encode.encode 0
+                        encodeRequest (Login (LoginPayload payload.username payload.guid))
                 in
                 ( { model | loginError = "" }, WebSocket.send chatServer message )
 
@@ -94,7 +99,11 @@ update msg model =
             ( model, Cmd.none )
 
         SEND_MESSAGE ->
-            ( model, Cmd.none )
+            let
+                message =
+                    encodeRequest (Message model.chatText)
+            in
+            ( { model | chatText = "" }, WebSocket.send chatServer message )
 
         GET_USERS ->
             ( model, Cmd.none )
@@ -103,15 +112,18 @@ update msg model =
             ( model, Cmd.none )
 
         SOCKET_MESSAGE response ->
-            let
-                result = parseMessage response
-            in
-                case result of
-                    LoginSuccess l -> ( { model | guid = l.guid, username = l.username }, Cmd.none)
-                    MessageRes m -> ( { model | messages = model.messages ++ [(ChatMessage m.timeStamp m.text)] }, Cmd.none)
-                    UsersListRes users_ -> ({ model | users = users_ }, Cmd.none)
---                    LoginSuccess login -> ({ model |  })
-                    _ -> ( model, Cmd.none )
+            case (parseMessage response) of
+                LoginSuccess l ->
+                    ( { model | guid = l.guid, username = l.username }, Cmd.none )
+
+                MessageRes m ->
+                    ( { model | messages = model.messages ++ [ ChatMessage m.timeStamp m.text ] }, Cmd.none )
+
+                UsersListRes users_ ->
+                    ( { model | users = users_ }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 resultToString : ReturnResult -> String
@@ -126,11 +138,12 @@ resultToString result =
         UsersListRes users ->
             "Users: [" ++ toString users ++ "]"
 
-        LoginFail fail
-            -> toString fail.message
+        LoginFail fail ->
+            toString fail.message
 
         Error err ->
             toString err
+
 
 
 -- SUBSCRIPTIONS
@@ -144,25 +157,41 @@ subscriptions model =
 
 -- VIEW
 
+
 loginView : Model -> Html Msg
 loginView model =
     div []
-    [ input [ type_ "text", placeholder "User name", onInput InputName ] []
-    , input [ type_ "button", onClick SEND_LOGIN, value "Login" ] [ ]
-    ]
+        [ input [ type_ "text", placeholder "User name", onInput InputName ] []
+        , input [ type_ "button", onClick SEND_LOGIN, value "Login" ] []
+        ]
 
-chatStyle = [ ( "display", "flex" ), ( "flexDirection", "row" ), ( "height", "90vh" ) ]
-usersListStyle = [ ( "width", "20vw") ]
-messagesListStyle = [ ( "width", "80vw") ]
-inputStyle = [ ( "height", "10vh" ) ]
+
+chatStyle =
+    [ ( "display", "flex" ), ( "flexDirection", "row" ), ( "height", "90vh" ) ]
+
+
+usersListStyle =
+    [ ( "width", "20vw" ) ]
+
+
+messagesListStyle =
+    [ ( "width", "80vw" ) ]
+
+
+inputStyle =
+    [ ( "height", "10vh" ) ]
+
 
 chatView : Model -> Html Msg
 chatView model =
     let
-        users = List.map (\user -> div [] [ text user ]) model.users
-        messages = List.map (\message -> div [] [ text message.text ]) model.messages
+        users =
+            List.map (\user -> div [] [ text user ]) model.users
+
+        messages =
+            List.map (\message -> div [] [ text message.text ]) model.messages
     in
-        div []
+    div []
         [ div [ style chatStyle ]
             [ div [ style usersListStyle ]
                 [ label [] [ text "Users online:" ]
@@ -171,13 +200,17 @@ chatView model =
             , div [ style messagesListStyle ] messages
             ]
         , div [ style inputStyle ]
-            [ input [ type_ "text", onInput ] []
+            [ input [ type_ "text", onInput InputMsg ] []
+            , input [ type_ "button", onClick SEND_MESSAGE, value "Send" ] []
             ]
         ]
+
 
 view : Model -> Html Msg
 view model =
     case String.isEmpty model.guid of
-        True -> loginView model
-        False -> chatView model
+        True ->
+            loginView model
 
+        False ->
+            chatView model
