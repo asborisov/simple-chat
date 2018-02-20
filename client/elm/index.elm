@@ -1,15 +1,17 @@
 module Main exposing (..)
 
+import ChatInterface exposing (message)
 import Date
 import Debug exposing (log)
 import DecodeResponse exposing (ReturnResult(..), parseMessage)
 import EncodeRequest exposing (LoginPayload, Payload(..), encodeRequest)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (placeholder, style, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode exposing (decodeString, field)
 import Json.Encode exposing (encode, object)
 import WebSocket exposing (..)
+import Ports.LocalStorage exposing (..)
 
 
 main =
@@ -24,7 +26,7 @@ main =
 type alias ChatMessage =
     { timeStamp : Date.Date
     , text : String
---    , author : String
+    , author : String
     }
 
 
@@ -69,6 +71,22 @@ type Msg
     | InputMsg String
 
 
+sendLogin : Model -> ( Model, Cmd Msg )
+sendLogin model =
+    let
+        payload =
+            { username = model.username, guid = "" }
+    in
+    if String.isEmpty payload.username == True then
+        ( { model | loginError = "Wrong login!" }, Cmd.none )
+    else
+        let
+            message =
+                encodeRequest (Login (LoginPayload payload.username payload.guid))
+        in
+        ( { model | loginError = "" }, WebSocket.send chatServer message )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -79,18 +97,7 @@ update msg model =
             ( { model | chatText = text }, Cmd.none )
 
         SEND_LOGIN ->
-            let
-                payload =
-                    { username = model.username, guid = "" }
-            in
-            if String.isEmpty payload.username == True then
-                ( { model | loginError = "Wrong login!" }, Cmd.none )
-            else
-                let
-                    message =
-                        encodeRequest (Login (LoginPayload payload.username payload.guid))
-                in
-                ( { model | loginError = "" }, WebSocket.send chatServer message )
+            sendLogin model
 
         USER_LOGIN ->
             ( model, Cmd.none )
@@ -112,12 +119,12 @@ update msg model =
             ( model, Cmd.none )
 
         SOCKET_MESSAGE response ->
-            case (parseMessage response) of
+            case parseMessage response of
                 LoginSuccess l ->
                     ( { model | guid = l.guid, username = l.username }, Cmd.none )
 
                 MessageRes m ->
-                    ( { model | messages = model.messages ++ [ ChatMessage m.timeStamp m.text ] }, Cmd.none )
+                    ( { model | messages = model.messages ++ [ ChatMessage m.timeStamp m.text m.author ] }, Cmd.none )
 
                 UsersListRes users_ ->
                     ( { model | users = users_ }, Cmd.none )
@@ -157,12 +164,32 @@ subscriptions model =
 
 -- VIEW
 
+onEnter : Msg -> Html.Attribute Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Json.Decode.succeed msg
+            else
+                Json.Decode.fail "not ENTER"
+    in
+        on "keydown" (Json.Decode.andThen isEnter keyCode)
+
+
+loginStyle =
+    [ ( "position", "absolute" )
+    , ( "top", "50%" )
+    , ( "left", "50%" )
+    , ( "transform", "translate(-50%, -50%)" )
+    , ( "textAlign", "center" )
+    , ( "padding", "1px" )
+    ]
 
 loginView : Model -> Html Msg
 loginView model =
-    div []
-        [ input [ type_ "text", placeholder "User name", onInput InputName ] []
-        , input [ type_ "button", onClick SEND_LOGIN, value "Login" ] []
+    div [ style loginStyle ]
+        [ input [ type_ "text", placeholder "Enter you login", onInput InputName, onEnter SEND_LOGIN ] []
+        , input [ type_ "button", onClick SEND_LOGIN, value "Enter" ] []
         ]
 
 
@@ -171,15 +198,21 @@ chatStyle =
 
 
 usersListStyle =
-    [ ( "width", "20vw" ) ]
+    [ ( "width", "20%" ), ( "padding", "0.5em" ) ]
 
 
 messagesListStyle =
+    [ ( "width", "80%" ), ( "overflow-x", "hidden" ), ( "overflow-y", "auto" ) ]
+
+
+bottomStyle =
+    [ ( "height", "calc(10vh - 1em)" ), ( "margin", "0.5em") ]
+
+bottomInputStyle =
     [ ( "width", "80vw" ) ]
 
-
-inputStyle =
-    [ ( "height", "10vh" ) ]
+bottomButtonStyle =
+    [ ("margin", "0 0.5em") ]
 
 
 chatView : Model -> Html Msg
@@ -189,7 +222,7 @@ chatView model =
             List.map (\user -> div [] [ text user ]) model.users
 
         messages =
-            List.map (\message -> div [] [ text message.text ]) model.messages
+            List.map ChatInterface.message model.messages
     in
     div []
         [ div [ style chatStyle ]
@@ -199,9 +232,9 @@ chatView model =
                 ]
             , div [ style messagesListStyle ] messages
             ]
-        , div [ style inputStyle ]
-            [ input [ type_ "text", onInput InputMsg ] []
-            , input [ type_ "button", onClick SEND_MESSAGE, value "Send" ] []
+        , div [ style bottomStyle ]
+            [ input [ type_ "text", style bottomInputStyle, onInput InputMsg, onEnter SEND_MESSAGE, value model.chatText ] []
+            , input [ type_ "button", style bottomButtonStyle, onClick SEND_MESSAGE, value "Send" ] []
             ]
         ]
 

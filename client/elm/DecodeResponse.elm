@@ -47,6 +47,9 @@ type ReturnResult
     | UsersListRes UsersList
     | Error ErrorType
 
+--type Msg =
+
+
 
 timestampToDate : Decoder Date
 timestampToDate =

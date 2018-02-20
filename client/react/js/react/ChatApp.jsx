@@ -87,15 +87,15 @@ class ChatApp extends React.Component {
         }
         return [
             <div style={{display: 'flex', flexDirection: 'row', height: '90vh'}} key="chat">
-                <Messages
-                    key={'messages'}
-                    style={{width: '80vw'}}
-                    messages={this.state.messages}
-                />
                 <Users
                     key={'users'}
                     style={{width: '20vw'}}
                     users={this.state.users}
+                />
+                <Messages
+                    key={'messages'}
+                    style={{width: '80vw'}}
+                    messages={this.state.messages}
                 />
             </div>,
             <div key="input" style={{height: '10vh'}}>
