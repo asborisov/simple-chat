@@ -12,7 +12,6 @@
     "ws": "^2.2.2"
   },
   "scripts": {
-    "start-server": "node server/node",
-    "postinstall": "cd client/react && npm install"
+    "start-server": "node server/node"
   }
 }

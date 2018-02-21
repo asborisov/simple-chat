@@ -1,4 +1,4 @@
-module EncodeRequest exposing (Payload (..), LoginPayload, encodeRequest)
+module Chat.EncodeRequest exposing (Payload (..), LoginPayload, encodeRequest)
 --import Debug exposing (log)
 --import Html exposing (Html)
 import Json.Encode exposing (string, Value)

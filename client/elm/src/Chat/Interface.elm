@@ -1,4 +1,4 @@
-module ChatInterface exposing (message)
+module Chat.Interface exposing (message)
 
 import Date
 import Html exposing (Html, button, div, input, label, text)

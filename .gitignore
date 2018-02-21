@@ -1,4 +1,5 @@
 *.iml
 .idea/
 node_modules
+/client/elm_old/elm-stuff/
 /client/elm/elm-stuff/

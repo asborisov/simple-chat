@@ -1,12 +1,12 @@
 module Main exposing (..)
 
-import ChatInterface exposing (message)
+import Chat.Interface exposing (message)
 import Date
 import Debug exposing (log)
-import DecodeResponse exposing (ReturnResult(..), parseMessage)
-import EncodeRequest exposing (LoginPayload, Payload(..), encodeRequest)
+import Chat.DecodeResponse exposing (ReturnResult(..), parseMessage)
+import Chat.EncodeRequest exposing (LoginPayload, Payload(..), encodeRequest)
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (placeholder, style, type_, value)
+import Html.Attributes exposing (placeholder, style, type_, value, class)
 import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode exposing (decodeString, field)
 import Json.Encode exposing (encode, object)
@@ -176,18 +176,9 @@ onEnter msg =
         on "keydown" (Json.Decode.andThen isEnter keyCode)
 
 
-loginStyle =
-    [ ( "position", "absolute" )
-    , ( "top", "50%" )
-    , ( "left", "50%" )
-    , ( "transform", "translate(-50%, -50%)" )
-    , ( "textAlign", "center" )
-    , ( "padding", "1px" )
-    ]
-
 loginView : Model -> Html Msg
 loginView model =
-    div [ style loginStyle ]
+    div [ class "login" ]
         [ input [ type_ "text", placeholder "Enter you login", onInput InputName, onEnter SEND_LOGIN ] []
         , input [ type_ "button", onClick SEND_LOGIN, value "Enter" ] []
         ]
@@ -222,7 +213,7 @@ chatView model =
             List.map (\user -> div [] [ text user ]) model.users
 
         messages =
-            List.map ChatInterface.message model.messages
+            List.map Chat.Interface.message model.messages
     in
     div []
         [ div [ style chatStyle ]
