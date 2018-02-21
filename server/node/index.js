@@ -82,10 +82,9 @@ ws.on('connection', socket => {
  * @param msg.type {string} Message type
  * @param msg.text {string} Message text
  * @param msg.timestamp {number} Timestamp
- * @param msg.[sender] {string} Who send this message
  */
 const sendMessage = msg => {
-    msg = JSON.stringify(Object.assign({
+    const m = JSON.stringify(Object.assign({
         type: 'message',
         ts: +(new Date()),
         author: '',
@@ -93,7 +92,7 @@ const sendMessage = msg => {
     }, msg));
     ws.clients.forEach(client => {
         if (client.username) {
-            client.send(msg);
+            client.send(m);
         }
     });
 };
@@ -126,7 +125,7 @@ const loginUser = (username, guid, socket) => {
     if (users[username]) {
         // User offline
         if (!users[username].isOnline) {
-            if (users[username].guid === guid) {
+            if (users[username].guid == guid) {
                 // Same user
                 users[username].isOnline = true;
                 usersOnline.push(username);
