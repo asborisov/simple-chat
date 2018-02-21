@@ -1,4 +1,4 @@
-module DecodeResponse exposing (parseMessage, ReturnResult (..), ErrorType (..), Message, Login)
+module Chat.DecodeResponse exposing (parseMessage, ReturnResult (..), ErrorType (..), Message, Login)
 
 --module Main exposing (..)
 
