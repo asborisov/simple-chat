@@ -1,9 +1,15 @@
+const process = require('process');
+const getPort = (defaultPort, process) =>
+    process.argv.reduce((port, arg, index) =>
+        (index < 2 || arg.indexOf('port') === -1) ? port : arg.split('=')[1],
+        defaultPort);
+const port = getPort(3000, process);
 // WebSocket server library
 const WebSocket = require('ws');
 // GUID generator
 const uuid = require('uuid');
 // WebSocket Server
-const ws = new WebSocket.Server({port: 3000});
+const ws = new WebSocket.Server({port});
 
 // Users info
 let users = {};
@@ -28,7 +34,7 @@ ws.on('connection', socket => {
                     if (result.status === 0) {
                         socket.username = msg.username;
                         sendMessage({
-                            text: 'User ' + socket.username + ' connected',
+                            text: `User ${socket.username} connected`,
                         });
                         log(msg);
                         msgToSend = {
@@ -110,7 +116,7 @@ const sendUserList = () => {
             client.send(msg);
         }
     });
-    log('sendUserList:' + msg);
+    log(`sendUserList: ${msg}`);
 };
 
 /**
@@ -173,11 +179,13 @@ const logoutUser = username => {
         isOnline: false
     });
     usersOnline.splice(usersOnline.indexOf(username), 1);
-    sendMessage({text: 'User ' + username + ' disconnected'});
+    sendMessage({text: `User ${username} disconnected`});
 };
 
 const log = msg => {
     console.log((typeof msg !== 'string') ? JSON.stringify(msg) : msg);
 };
 
-log('server started');
+
+
+log(`server started on port ${port}`);
