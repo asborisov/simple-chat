@@ -1,6 +1,4 @@
 module Chat.EncodeRequest exposing (Payload (..), LoginPayload, encodeRequest)
---import Debug exposing (log)
---import Html exposing (Html)
 import Json.Encode exposing (string, Value)
 
 type alias LoginPayload =
@@ -31,5 +29,3 @@ encodeRequest payload =
         |> requestData
         |> Json.Encode.object
         |> Json.Encode.encode 0
-
---main = log "test" (encodeRequest (Login (LoginPayload "timan" "123")))

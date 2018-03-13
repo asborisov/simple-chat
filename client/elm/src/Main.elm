@@ -1,19 +1,18 @@
 module Main exposing (..)
 
-import Chat.Interface exposing (message)
-import Date
-import Debug exposing (log)
 import Chat.DecodeResponse exposing (ReturnResult(..), parseMessage)
 import Chat.EncodeRequest exposing (LoginPayload, Payload(..), encodeRequest)
+import Chat.Interface exposing (message)
+import Chat.LocalStorage exposing (chatDataDecoder, getChatData, saveChatData)
+import Date
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (placeholder, style, type_, value, class)
-import Html.Events exposing (onClick, onInput, on, keyCode)
+import Html.Attributes exposing (class, placeholder, style, type_, value)
+import Html.Events exposing (keyCode, on, onClick, onInput)
 import Json.Decode exposing (decodeString, field)
-import Json.Encode exposing (encode, object)
-import WebSocket exposing (..)
 import Ports.LocalStorage exposing (..)
+import WebSocket exposing (..)
 
-
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -47,16 +46,27 @@ defaultModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( defaultModel, Cmd.none )
+    ( defaultModel, getChatData )
+
+
+serverPort : Int
+serverPort =
+    3001
 
 
 chatServer : String
 chatServer =
-    "ws://localhost:3000"
+    "ws://localhost:" ++ toString serverPort
 
 
 
 -- UPDATE
+
+
+type alias LoginPayload =
+    { username : String
+    , guid : String
+    }
 
 
 type Msg
@@ -69,6 +79,7 @@ type Msg
     | SOCKET_MESSAGE String
     | InputName String
     | InputMsg String
+    | RestoreSession ( String, Json.Decode.Value )
 
 
 sendLogin : Model -> ( Model, Cmd Msg )
@@ -77,6 +88,7 @@ sendLogin model =
         payload =
             { username = model.username, guid = "" }
     in
+    -- Need more complex validation
     if String.isEmpty payload.username == True then
         ( { model | loginError = "Wrong login!" }, Cmd.none )
     else
@@ -90,6 +102,18 @@ sendLogin model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        RestoreSession ( field, value ) ->
+            case Json.Decode.decodeValue chatDataDecoder value of
+                Ok payload ->
+                    let
+                        message =
+                            encodeRequest (Login (LoginPayload payload.username payload.guid))
+                    in
+                    ( { model | loginError = "" }, WebSocket.send chatServer message )
+
+                Err err ->
+                    ( { model | loginError = err }, Cmd.none )
+
         InputName name ->
             ( { model | username = name }, Cmd.none )
 
@@ -121,7 +145,7 @@ update msg model =
         SOCKET_MESSAGE response ->
             case parseMessage response of
                 LoginSuccess l ->
-                    ( { model | guid = l.guid, username = l.username }, Cmd.none )
+                    ( { model | guid = l.guid, username = l.username }, saveChatData l )
 
                 MessageRes m ->
                     ( { model | messages = model.messages ++ [ ChatMessage m.timeStamp m.text m.author ] }, Cmd.none )
@@ -158,11 +182,15 @@ resultToString result =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen chatServer SOCKET_MESSAGE
+    Sub.batch
+        [ WebSocket.listen chatServer SOCKET_MESSAGE
+        , Ports.LocalStorage.storageGetItemResponse RestoreSession
+        ]
 
 
 
 -- VIEW
+
 
 onEnter : Msg -> Html.Attribute Msg
 onEnter msg =
@@ -173,7 +201,7 @@ onEnter msg =
             else
                 Json.Decode.fail "not ENTER"
     in
-        on "keydown" (Json.Decode.andThen isEnter keyCode)
+    on "keydown" (Json.Decode.andThen isEnter keyCode)
 
 
 loginView : Model -> Html Msg
@@ -184,26 +212,32 @@ loginView model =
         ]
 
 
+chatStyle : List ( String, String )
 chatStyle =
     [ ( "display", "flex" ), ( "flexDirection", "row" ), ( "height", "90vh" ) ]
 
 
+usersListStyle : List ( String, String )
 usersListStyle =
     [ ( "width", "20%" ), ( "padding", "0.5em" ) ]
 
 
+messagesListStyle : List ( String, String )
 messagesListStyle =
     [ ( "width", "80%" ), ( "overflow-x", "hidden" ), ( "overflow-y", "auto" ) ]
 
 
+bottomStyle : List ( String, String )
 bottomStyle =
-    [ ( "height", "calc(10vh - 1em)" ), ( "margin", "0.5em") ]
+    [ ( "height", "calc(10vh - 1em)" ), ( "margin", "0.5em" ) ]
 
+bottomInputStyle : List ( String, String )
 bottomInputStyle =
     [ ( "width", "80vw" ) ]
 
+bottomButtonStyle : List ( String, String )
 bottomButtonStyle =
-    [ ("margin", "0 0.5em") ]
+    [ ( "margin", "0 0.5em" ) ]
 
 
 chatView : Model -> Html Msg
