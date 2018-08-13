@@ -1,12 +1,3 @@
-import App from './components/App.svelte';
-
-const app = new App({
-    target: document.getElementById("root"),
-    data: {
-        name: 'world'
-    }
-});
+import { app } from './js/index.js';
 
 window.app = app;
-
-export default app;

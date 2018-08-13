@@ -1,7 +1,18 @@
-<h1>Hello {name}!</h1>
+<Login on:submit="onLoginSubmit(event)"></Login>
 
-<style>
-    h1 {
-        color: purple;
+<script>
+    export default {
+        immutable: true,
+        components: {
+            Login: "./Login.svelte",
+            Chat: "./Chat.svelte"
+        },
+        methods: {
+            onLoginSubmit(event) {
+                event.preventDefault();
+                const username = event.target.querySelector('[type="text"]').value;
+                this.store.login(username);
+            }
+        }
     }
-</style>
+</script>

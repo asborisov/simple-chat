@@ -10,21 +10,7 @@ const createSocket = (storage, onConnectionClosed) => {
     socket.onmessage = event => {
         try {
             const payload = JSON.parse(event.data);
-            // Check message type
-            switch (payload.type) {
-                case 'login': {
-                    storage.dispatch({type:'USER_LOGIN', payload});
-                    break;
-                }
-                case 'message': {
-                    storage.dispatch({type: 'GET_MESSAGE', payload});
-                    break;
-                }
-                case 'usersList': {
-                    storage.dispatch({type: 'GET_USERS', payload});
-                    break;
-                }
-            }
+            storage.dispatch(payload);
         } catch (ex) {
             // JSON parse error
             console.error(ex);
