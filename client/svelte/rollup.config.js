@@ -18,6 +18,10 @@ export default {
             // You can restrict which files are compiled
             // using `include` and `exclude`
             include: 'src/components/**.html',
+
+            css: (css) => {
+                css.write('dist/main.css');
+            }
         }),
         babel({
             include: ['./src/**/*.js'],
