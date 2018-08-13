@@ -12,12 +12,9 @@ export default {
     },
     plugins: [
         svelte({
-            // By default, all .html and .svelte files are compiled
-            extensions: ['.html'],
-
             // You can restrict which files are compiled
             // using `include` and `exclude`
-            include: 'src/components/**.html',
+            include: 'src/**.svelte',
 
             css: (css) => {
                 css.write('dist/main.css');
