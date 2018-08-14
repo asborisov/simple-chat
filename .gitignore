@@ -4,3 +4,4 @@ node_modules
 /client/elm_old/elm-stuff/
 /client/elm/elm-stuff/
 /client/svelte/dist/
+/client/react/dist/

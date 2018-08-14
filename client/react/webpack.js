@@ -1,6 +1,7 @@
 "use strict";
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const config = {
     entry: {
@@ -32,7 +33,8 @@ const config = {
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
             filename: "[name].js"
-        })
+        }),
+        new UglifyJsPlugin(),
     ],
     resolve: {
         extensions: ['.js', '.jsx'],
