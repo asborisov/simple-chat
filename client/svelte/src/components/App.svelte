@@ -1,4 +1,8 @@
+{#if !$guid}
 <Login on:submit="onLoginSubmit(event)"></Login>
+{:else}
+<Chat></Chat>
+{/if}
 
 <script>
     export default {

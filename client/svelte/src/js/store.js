@@ -7,35 +7,58 @@ const defaultState = {
     loginError: null,
     guid: null,
     messages: [],
-    users: []
+    users: [],
+    inputText: '',
 };
 
 export class ChatStore extends Store {
     constructor() {
         super(defaultState);
+
         initWs({
-            dispatch: (action) => {
-                switch (action.type) {
-                    case "login": {
-                        if (action.status === "ok") {
-                            const userData = {username: action.username, guid: action.guid};
-                            saveLs(userData);
-                            this.set(Object.assign({}, userData, {
-                                loginError: null
-                            }));
-                        } else {
-                            this.set({
-                                loginError: action.message,
-                            })
-                        }
-                    }
-                }
-            }
+            dispatch: this.messageHandler.bind(this),
         });
 
         const localData = loadLs();
         if (localData) {
             this.login(localData.username, localData.guid);
+        }
+    }
+    messageHandler(message) {
+        switch (message.type) {
+            case "login":
+                if (message.status === "ok") {
+                    const userData = {username: message.username, guid: message.guid};
+                    saveLs(userData);
+                    this.set(Object.assign({}, userData, {
+                        loginError: null
+                    }));
+                } else {
+                    this.set({
+                        loginError: message.message,
+                    })
+                }
+                break;
+            case "usersList":
+                this.set({
+                    users: message.list,
+                });
+                break;
+            case "message":
+                this.set({
+                    messages: [
+                        ...this.get().messages,
+                        {
+                            uid: message.uid,
+                            text: message.text,
+                            author: message.author,
+                            date: new Date(message.ts)
+                        }
+                    ]
+                });
+                break;
+            default:
+                break;
         }
     }
     login(username, guid = null) {
@@ -45,5 +68,9 @@ export class ChatStore extends Store {
             });
         }
         sendWs({ type: "login", username: username, guid: guid});
+    }
+    sendMessage(text) {
+        if (!text) return;
+        sendWs({ type: 'message', text });
     }
 }

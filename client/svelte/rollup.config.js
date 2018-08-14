@@ -14,17 +14,14 @@ export default {
     plugins: [
         resolve(),
         svelte({
-            // You can restrict which files are compiled
-            // using `include` and `exclude`
             include: 'src/**.svelte',
-
-            // css: (css) => {
-            //     css.write('dist/main.css');
-            // }
+            css: (css) => {
+                css.write('dist/main.css');
+            }
         }),
         babel({
             include: ['./src/**/*.js'],
         }),
-        // terser(),
+        terser(),
     ],
 };
