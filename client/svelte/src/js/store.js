@@ -57,6 +57,9 @@ export class ChatStore extends Store {
                     ]
                 });
                 break;
+            case "logout":
+                this.set(defaultState);
+                break;
             default:
                 break;
         }

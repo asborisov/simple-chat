@@ -4,15 +4,14 @@ const WebSocket = window.WebSocket;
 let socket = null;
 let queue = [];
 
-const createSocket = (storage, onConnectionClosed) => {
+const createSocket = (store, onConnectionClosed) => {
     const socket = new WebSocket("ws://localhost:3000");
 
     socket.onmessage = event => {
         try {
             const payload = JSON.parse(event.data);
-            storage.dispatch(payload);
+            store.dispatch(payload);
         } catch (ex) {
-            // JSON parse error
             console.error(ex);
         }
     };
@@ -28,7 +27,7 @@ const createSocket = (storage, onConnectionClosed) => {
 
     socket.onclose = () => {
         alert('Lost connection. Try to re-login');
-        storage.dispatch({type: 'USER_LOGOUT'});
+        store.dispatch({type: 'logout'});
         if (typeof onConnectionClosed === 'function') {
             onConnectionClosed();
         }
