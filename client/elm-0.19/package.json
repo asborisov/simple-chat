@@ -1,0 +1,16 @@
+{
+  "name": "elm-0.19",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup-plugin-elm": "^2.0.0",
+    "rollup": "^0.65.0"
+  }
+}
